@@ -51,7 +51,8 @@ const remAcento = require(cfg.caminhoRemAcento);
 var MongoClient = mongodb.MongoClient;
 const url_DB = cfg.tokenDB;
 MongoClient.connect(url_DB, {
-        useNewUrlParser: true
+        useNewUrlParser: true,
+        useUnifiedTopology: true
     })
     .then(async conn  =>  {
         client_db = conn.db('cax_discord_bot');
@@ -271,7 +272,7 @@ bot.on('message', async message => {
             }
         }
         //Add auto-resposta
-        if (messageClear.startsWith("addresposta") || auxiliarAddAutoresposta) {
+        else if (messageClear.startsWith("addresposta") || auxiliarAddAutoresposta) {
             let args = message.content.substr(13).toLocaleLowerCase();
             if (ResponseList[remAcento.remover(args)] && !auxiliarAddAutoresposta) { //se a resposta já existe
                 console.log(`Um novo request de auto-resposta iniciado por [${message.author.username}].`);
@@ -326,7 +327,7 @@ bot.on('message', async message => {
             return;
         }
         //Remove auto-resposta
-        if (messageClear.startsWith("remresposta") || auxiliarRemAutoresposta) {
+        else if (messageClear.startsWith("remresposta") || auxiliarRemAutoresposta) {
             let argsAux = message.content.split(/ +/);
             argsAux.shift();
             argsAux = argsAux.join(" ");
@@ -388,12 +389,12 @@ bot.on('message', async message => {
             }
         }
         //Mostrar pontos
-        if (messageClear.startsWith("pontos")) {
+        else if (messageClear.startsWith("pontos")) {
             message.reply("você tem " + rankingFile[message.author.id]['Points'] + " decepções. :confused:");
             return;
         }
         //Ping
-        if (messageClear.startsWith("ping")) {
+        else if (messageClear.startsWith("ping")) {
             const msgPing = await message.channel.send("Ping? :thinking:");
             msgPing.edit("Pong! :ping_pong:\nLatencia da mensagem: " + (msgPing.createdTimestamp - message.createdTimestamp) + "ms\nLatencia do bot: " + Math.round(bot.ping) + "ms");
             rankingFile[message.author.id]['Points'] = (rankingFile[message.author.id]['Points'] + 1);
@@ -401,7 +402,7 @@ bot.on('message', async message => {
             return;
         }
         //Apagar mensagens
-        if (messageClear.startsWith("limpar")) {
+        else if (messageClear.startsWith("limpar")) {
             if (!message.member.roles.some(r => [cfg.cargoAdm, cfg.cargoMod].includes(r.name))) {
                 message.reply("Seu cargo não te dá permissão para limpar o chat.");
                 return;
@@ -429,7 +430,7 @@ bot.on('message', async message => {
             }
         }
         //Kick
-        if (messageClear.startsWith("kick")) {
+        else if (messageClear.startsWith("kick")) {
             if (!message.member.roles.some(r => [cfg.cargoAdm, cfg.cargoMod].includes(r.name))) {
                 message.reply("Seu cargo não te dá permissão para kickar alguém.");
                 return;
@@ -453,7 +454,7 @@ bot.on('message', async message => {
             message.reply(memberKick + " foi kickado por " + message.author.username + " por motivos de: " + razãoKick);
         }
         //Ban
-        if (messageClear.startsWith("ban")) {
+        else if (messageClear.startsWith("ban")) {
             if (!message.member.roles.some(r => [cfg.cargoAdm].includes(r.name))) {
                 message.reply("Seu cargo não te dá permissão para banir alguém.");
                 return;
@@ -477,7 +478,7 @@ bot.on('message', async message => {
             message.reply(memberBan + " foi banido por " + message.author.username + " por motivos de: " + razãoBan);
         }
         //Votação
-        if (messageClear.startsWith("votação") || auxiliarVotação) {
+        else if (messageClear.startsWith("votação") || auxiliarVotação) {
             if (!auxiliarVotação) {
                 message.channel.send("A votação iniciou! Digite ``resultado`` para encerrar a votação");
                 fraseVote = messageClear.substr(7);
@@ -513,7 +514,7 @@ bot.on('message', async message => {
             return;
         }
         //Escolher
-        if (messageClear.startsWith("escolher")) {
+        else if (messageClear.startsWith("escolher")) {
             var fraseChoose = messageClear.substr(8);
             fraseChoose = fraseChoose.split(',');
             for (let i = 0; i < fraseChoose.length; i++) {
@@ -528,7 +529,7 @@ bot.on('message', async message => {
             return;
         }
         //BlackList
-        if (messageClear.startsWith("blacklist")) {
+        else if (messageClear.startsWith("blacklist")) {
             let args = remAcento.remover(message.content.substr(11));
             if (BlackList[args]) { //se a palavra já existe
                 if (!message.member.roles.some(r => [cfg.cargoAdm].includes(r.name))) {
@@ -552,14 +553,14 @@ bot.on('message', async message => {
             return;
         }
         //Emotes
-        if (messageClear.startsWith("emotes")) {
+        else if (messageClear.startsWith("emotes")) {
             let emoteStr = "Lista de emotes do canal:\n"
             let emojiStrE = message.guild.emojis.map(e => e.toString()).join(" ");
             emoteStr = emoteStr + emojiStrE;
             message.channel.send(emoteStr);
         }
         //Gif
-        if (messageClear.startsWith("gif")) {
+        else if (messageClear.startsWith("gif")) {
             let searchGif = messageClear.substr(4);
             giphy.search('gifs', {
                     "q": searchGif,
@@ -584,7 +585,7 @@ bot.on('message', async message => {
                 })
         }
         //Random Gif
-        if (messageClear.startsWith("randomgif")) {
+        else if (messageClear.startsWith("randomgif")) {
             let searchGif = messageClear.substr(10);
             giphy.random('gifs', {
                     "tag": searchGif,
@@ -609,13 +610,13 @@ bot.on('message', async message => {
                 })
         }
         //Leet
-        if (messageClear.startsWith("leet")) {
+        else if (messageClear.startsWith("leet")) {
             let textRaw = messageClear.substr(5);
             textConverted = leet.convert(textRaw);
             message.channel.send(textConverted);
         }
         //Wikipédia
-        if (messageClear.startsWith("wiki")) {
+        else if (messageClear.startsWith("wiki")) {
             let args = message.content.split(/ +/);
             if (args[1] == "imagem") {
                 args.splice(0, 2);
@@ -654,7 +655,7 @@ bot.on('message', async message => {
             }
         }
         //Converter moedas
-        if (messageClear.startsWith("converter")) {
+        else if (messageClear.startsWith("converter")) {
             let args = message.content.split(/ +/);
             args.shift();
             args[0] = args[0].replace(",", ".");
@@ -697,7 +698,7 @@ bot.on('message', async message => {
             });
         }
         //Rip
-        if (messageClear.startsWith("rip")) {
+        else if (messageClear.startsWith("rip")) {
             let argsRip = message.content.split(/ +/);
             argsRip.shift();
             argsRip = argsRip.join(" ");
@@ -714,7 +715,7 @@ bot.on('message', async message => {
             })
         }
         //Remover background
-        if (messageClear.startsWith("rembg")) {
+        else if (messageClear.startsWith("rembg")) {
             let args = message.content.split(/ +/);
             args.shift();
             args = args.join(" ");
@@ -766,7 +767,7 @@ bot.on('message', async message => {
             }
         }
         //Upload Giphy
-        if (messageClear.startsWith("upgif")) {
+        else if (messageClear.startsWith("upgif")) {
             let args = message.content.split(/ +/);
             args.shift();
             args = args.join(" ");
@@ -800,7 +801,7 @@ bot.on('message', async message => {
             }
         }
         //Contar
-        if (messageClear.startsWith("contar")) {
+        else if (messageClear.startsWith("contar")) {
             let args = messageClear.split(/ +/);
             args.shift();
             args = args[0];
@@ -864,7 +865,7 @@ bot.on('message', async message => {
             }
         }
         //Add Evento
-        if (messageClear.startsWith("addevento") || auxiliarEvento) {
+        else if (messageClear.startsWith("addevento") || auxiliarEvento) {
             if (!auxiliarEvento){ //Inicio do request de adição e auxiliarEvento == false
                 eventState = eventMask;
                 let argsSplited = message.content.split(/ +/);
@@ -898,7 +899,7 @@ bot.on('message', async message => {
             }
         }
         //Imgur
-        if (messageClear.startsWith("upimgur")){
+        else if (messageClear.startsWith("upimgur")){
             let args = message.content.split(/ +/);
             args.shift();
             args = args.join(" ");
@@ -924,24 +925,46 @@ bot.on('message', async message => {
             }
         }
         //Lista de Auto Resposta
-        if(messageClear.startsWith("respostas")){
-            let respostas = Object.keys(ResponseList);
-            let charLimit = 1900;
-            let msg = "";
-            let i=0;
-            message.reply(`**Lista de auto-respostas:**`);
-            while((respostas.length>=1)&&(respostas[0])){
-                msg="```";
-                while((msg.length<charLimit)&&(respostas[0])){
-                    msg+=`${respostas[0]}, `;
-                    respostas.shift();
+        else if(messageClear.startsWith("respostas")){
+            let resposta = message.content.trim().split(/ +/g);
+            resposta.shift();
+            resposta = resposta.join(" ");
+            resposta = remAcento.remover(resposta.toLowerCase());
+            if (!resposta){
+                let respostas = Object.keys(ResponseList);
+                let charLimit = 1900;
+                let msg = "";
+                let i=0;
+                message.reply(`**Lista de auto-respostas:**`);
+                while((respostas.length>=1)&&(respostas[0])){
+                    msg = "```";
+                    while((msg.length<charLimit)&&(respostas[0])){
+                        msg += `${respostas[0]}, `;
+                        respostas.shift();
+                    }
+                    msg = msg.slice(0, msg.length - 2);
+                    msg += ".```";
+                    message.channel.send(`${msg}`)
+                    i++;
                 }
-                msg = msg.slice(0, msg.length - 2);
-                msg += ".```";
-                message.channel.send(`${msg}`)
-                i++;
+            }
+            else if(ResponseList[resposta]){
+                let msg = `Respostas para **${resposta}**:\n\`\`\``;
+                for(i=0;i<ResponseList[resposta].length;i++){
+                    msg += `    ${i+1} - ${ResponseList[resposta][i]}\n`;
+                }
+                msg += `\`\`\``;
+                message.channel.send(msg);
+            }
+            else{
+                message.channel.send(`Não existe nenhuma resposta para **${resposta}**.`);
             }
         }
+        //Unknown command
+        else{
+            message.channel.send(`Não existe nenhuma resposta para **${resposta}**.`);
+        }
+        
     } else { //Sem prefixo
         //Auto-resposta
         if (ResponseList[remAcento.remover(message.content.toLowerCase())]) {
@@ -962,3 +985,4 @@ bot.on('message', async message => {
 
 //TODO: Refazer o Player de música (depende do host)
 //TODO: Gravar audio do canal
+//TODO: add erro 404 para quando não existir um comando com "!" PERDIIIIIIIIIIIIIIIIIII
