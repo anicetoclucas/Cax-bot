@@ -962,7 +962,7 @@ bot.on('message', async message => {
         }
         //Unknown command
         else{
-            message.channel.send(`Não existe nenhuma resposta para **${resposta}**.`);
+            message.channel.send(`https://i.imgur.com/nJ42BI9.jpg`);
         }
         
     } else { //Sem prefixo
@@ -986,3 +986,4 @@ bot.on('message', async message => {
 //TODO: Refazer o Player de música (depende do host)
 //TODO: Gravar audio do canal
 //TODO: add erro 404 para quando não existir um comando com "!" PERDIIIIIIIIIIIIIIIIIII
+//TODO: mover o git do heroku para o github (já que o github agora está privado)
