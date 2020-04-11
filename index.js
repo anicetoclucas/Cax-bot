@@ -11,6 +11,7 @@ const xmlconvert = require('xml-js');
 const fs = require('fs');
 const request = require('request');
 const Imgur = require('imgur');
+const {randomNickname} = require('./src/randomNickname');
 
 //Calendário
 const meses = require('./src/meses');
@@ -20,15 +21,15 @@ const semanas = require('./src/semanas');
 var dbOk = 0;
 var emoteList = new Array();
 var chanceReact = 8; //chance = valor^-1
-var chanceAudio = 100; //chance = valor^-1
-var servidor = "RussosSuados"; //Servidor princial //TODO: separar os arquivos de DEV com os arquivos do github
+// var chanceAudio = 100; //chance = valor^-1
+var servidor = "RussosSuados"; //Servidor princial
 // var servidor = "Bot test";       //Servidor de teste
 var fusohorario = -3;
-var jaTocando = false;
-var jaAudioLoop = false;
-var jaDiaAudio = false;
-var jaHoraManhaAudio = false;
-var jaHoraZeroAudio = false;
+// var jaTocando = false;
+// var jaAudioLoop = false;
+// var jaDiaAudio = false;
+// var jaHoraManhaAudio = false;
+// var jaHoraZeroAudio = false;
 
 //Máscaras
 const eventMask = { //event mask for use in calendar
@@ -42,7 +43,7 @@ function esperar(millis) {
 }
 
 //Carregar arquivos locais
-var musicCfg = require(cfg.caminhoConfigMusic);
+// var musicCfg = require(cfg.caminhoConfigMusic);
 var HelpList = require(cfg.caminhoHelpList);
 const salvarJSON = require(cfg.caminhoFunçãoSalvarJSON);
 const remAcento = require(cfg.caminhoRemAcento);
@@ -88,7 +89,7 @@ var auxiliarEvento = false;
 var lastResponseList = "";
 var contadorVote = {};
 var fraseVote = null;
-var playlistChoice = null;
+// var playlistChoice = null;
 
 //Youtube
 var youTube = new YouTube();
@@ -216,6 +217,11 @@ bot.on('guildMemberAdd', member => {
         console.log("Canal de 'boas vindas' não existe.");
         return;
     }
+    member.setNickname(await randomNickname())
+    .catch(e => {
+        message.reply(`Erro: \n${e}`);
+        console.log(e);
+    });
     channel.send("Bem vindo ao esgoto do Discord, " + member.user + ". \nEsteja avisado que tudo o que você verá aqui é o mais puro **ódio**, **preconceito** e **niilismo** que já existiu. Mas você entrou assim mesmo. \n\nEntão, @everyone, deem os \"meus pêsames\" para " + member + ".\nhttps://i.imgur.com/2WPnTN1.png");
     salvarJSON.salvarDB(client_db, rankingFile, cfg.dbRanking);
 })
@@ -271,7 +277,7 @@ bot.on('message', async message => {
                 return;
             }
         }
-        //Add auto-resposta
+        //Add auto-answer
         else if (messageClear.startsWith("addresposta") || auxiliarAddAutoresposta) {
             let args = message.content.substr(13).toLocaleLowerCase();
             if (ResponseList[remAcento.remover(args)] && !auxiliarAddAutoresposta) { //se a resposta já existe
@@ -326,7 +332,7 @@ bot.on('message', async message => {
             salvarJSON.salvarDB(client_db, rankingFile, cfg.dbRanking);
             return;
         }
-        //Remove auto-resposta
+        //Remove auto-answer
         else if (messageClear.startsWith("remresposta") || auxiliarRemAutoresposta) {
             let argsAux = message.content.split(/ +/);
             argsAux.shift();
@@ -388,7 +394,7 @@ bot.on('message', async message => {
                 return;
             }
         }
-        //Mostrar pontos
+        //Show points
         else if (messageClear.startsWith("pontos")) {
             message.reply("você tem " + rankingFile[message.author.id]['Points'] + " decepções. :confused:");
             return;
@@ -401,7 +407,7 @@ bot.on('message', async message => {
             salvarJSON.salvarDB(client_db, rankingFile, cfg.dbRanking);
             return;
         }
-        //Apagar mensagens
+        //Clear
         else if (messageClear.startsWith("limpar")) {
             if (!message.member.roles.some(r => [cfg.cargoAdm, cfg.cargoMod].includes(r.name))) {
                 message.reply("Seu cargo não te dá permissão para limpar o chat.");
@@ -431,13 +437,13 @@ bot.on('message', async message => {
         }
         //Kick
         else if (messageClear.startsWith("kick")) {
-            if (!message.member.roles.some(r => [cfg.cargoAdm, cfg.cargoMod].includes(r.name))) {
+            if (!message.guild.member(message.author).hasPermission('KICK_MEMBERS')) {
                 message.reply("Seu cargo não te dá permissão para kickar alguém.");
                 return;
             }
             let memberKick = message.mentions.members.first();
             if (!memberKick) {
-                message.reply(memberKick + " não é um usuário desse servidor.")
+                message.reply(memberKick + " não é um usuário desse servidor.");
                 return;
             }
             if (!memberKick.kickable) {
@@ -449,13 +455,16 @@ bot.on('message', async message => {
             let razãoKick = fraseKick.slice(1).join(" ");
             if (!razãoKick)
                 razãoKick = "Sem nenhuma razão, ou seja, porque eu quis.";
-            await memberKick.kick(razãoKick).catch(erro => message.reply("Erro ao kickar " + memberKick + ".\nCausa do erro: " + erro));
-            // message.author.send("Você foi kickado por " + message.author.username + " por motivos de: " + razãoKick);
-            message.reply(memberKick + " foi kickado por " + message.author.username + " por motivos de: " + razãoKick);
+            await memberKick.kick(razãoKick).then(() => {
+                let userReslv = message.guild.members.find("id", message.mentions.members.first().id);
+                console.log(`Usuário kickado: ${memberKick.id}`);
+                userReslv.send(`Você foi kickado do servidor por: ${razãoKick}`);
+                message.reply(memberKick + " foi kickado por " + message.author.username + " por motivos de: " + razãoKick);
+            }).catch(erro => message.reply("Erro ao kickar " + memberKick + ".\nCausa do erro: " + erro));
         }
         //Ban
         else if (messageClear.startsWith("ban")) {
-            if (!message.member.roles.some(r => [cfg.cargoAdm].includes(r.name))) {
+            if (!message.guild.member(message.author).hasPermission('BAN_MEMBERS')) {
                 message.reply("Seu cargo não te dá permissão para banir alguém.");
                 return;
             }
@@ -473,9 +482,12 @@ bot.on('message', async message => {
             let razãoBan = fraseBan.slice(1).join(" ");
             if (!razãoBan)
                 razãoBan = "Sem nenhuma razão, ou seja, porque eu quis.";
-            await memberBan.ban(razãoBan).catch(erro => message.reply("Erro ao banir " + memberBan + ".\nCausa do erro: " + erro));
-            // message.author.send("Você foi banido por " + message.author.username + " por motivos de: " + razãoBan);
-            message.reply(memberBan + " foi banido por " + message.author.username + " por motivos de: " + razãoBan);
+            await memberBan.ban(razãoBan).then(() => {
+                let userReslv = message.guild.members.find("id", message.mentions.members.first().id);
+                console.log(`Usuário banido: ${memberBan.id}`);
+                userReslv.send(`Você foi banido do servidor por: ${razãoBan}`);
+                message.reply(memberBan + " foi banido por " + message.author.username + " por motivos de: " + razãoBan);
+            }).catch(erro => message.reply("Erro ao banir " + memberBan + ".\nCausa do erro: " + erro));
         }
         //Votação
         else if (messageClear.startsWith("votação") || auxiliarVotação) {
@@ -924,7 +936,7 @@ bot.on('message', async message => {
                 });
             }
         }
-        //Lista de Auto Resposta
+        //Auto-answer list
         else if(messageClear.startsWith("respostas")){
             let resposta = message.content.trim().split(/ +/g);
             resposta.shift();
@@ -960,6 +972,17 @@ bot.on('message', async message => {
                 message.channel.send(`Não existe nenhuma resposta para **${resposta}**.`);
             }
         }
+        //Random Nickname
+        else if(messageClear.startsWith("apelido")){
+            let newNick = await randomNickname();
+            message.member.setNickname(newNick).then(() => {
+                message.reply(`seu novo nome é ${newNick}`);
+            })
+            .catch(e => {
+                message.reply(`Erro: \n${e}`);
+                console.log(e);
+            });
+        }
         //Unknown command
         else{
             message.channel.send(`https://i.imgur.com/nJ42BI9.jpg`);
@@ -983,7 +1006,7 @@ bot.on('message', async message => {
     }
 });
 
-//TODO: Refazer o Player de música (depende do host)
+//TODO: Refazer o Player de música (melhorar o host)
 //TODO: Gravar audio do canal
-//TODO: add erro 404 para quando não existir um comando com "!" PERDIIIIIIIIIIIIIIIIIII
-//TODO: mover o git do heroku para o github (já que o github agora está privado)
+//TODO: Criar um sistema aleatório de nick
+//TODO: Converter tudo para funções em arquivos separados em './src'
