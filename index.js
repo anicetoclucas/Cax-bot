@@ -207,7 +207,7 @@ bot.on("guildDelete", guild => {
 });
 
 //New member on server
-bot.on('guildMemberAdd', member => {
+bot.on('guildMemberAdd', async member => {
     console.log("Novo Usuário: " + member + " - ID: " + member.id);
     rankingFile[member.id] = {
         'Points': 0
