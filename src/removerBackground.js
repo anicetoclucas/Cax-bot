@@ -1,6 +1,6 @@
 const fs = require('fs');
 const request = require('request');
-const cfg = require('./config.json');
+const cfg = require('../config.json');
 
 exports.removerBackground = function (link_URL, message) {
     request.post({

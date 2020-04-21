@@ -1,4 +1,4 @@
-const cfg = require('./config.json');
+const cfg = require('../config.json');
 
 exports.addBlacklist = function (BlackList, args, message) {
     if (BlackList[args]) { //se a palavra já existe
