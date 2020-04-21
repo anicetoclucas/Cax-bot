@@ -5,13 +5,16 @@ const YouTube = require('youtube-node');
 const mongodb = require('mongodb');
 const GphApiClient = require('giphy-js-sdk-core');
 const leet = require('leet');
-const wikipedia = require("node-wikipedia");
-const https = require('https');
-const xmlconvert = require('xml-js');
-const fs = require('fs');
 const request = require('request');
 const Imgur = require('imgur');
 const {randomNickname} = require('./src/randomNickname');
+const {esperar} = require('./src/esperar');
+const {removerBackground} = require('./src/removerBackground');
+const {converterMoedas} = require('./src/converterMoedas');
+const {searchWiki} = require('./src/searchWiki');
+const {addBlacklist} = require('./src/addBlacklist');
+const {playerBan} = require('./src/ban');
+const {playerKick} = require('./src/kick');
 
 //Calendário
 const meses = require('./src/meses');
@@ -36,11 +39,6 @@ const eventMask = { //event mask for use in calendar
     "timestamp":null,
     "mensagem":null
 };
-
-//Função Sleep
-function esperar(millis) {
-    return new Promise(resolve => setTimeout(resolve, millis));
-}
 
 //Carregar arquivos locais
 // var musicCfg = require(cfg.caminhoConfigMusic);
@@ -437,57 +435,11 @@ bot.on('message', async message => {
         }
         //Kick
         else if (messageClear.startsWith("kick")) {
-            if (!message.guild.member(message.author).hasPermission('KICK_MEMBERS')) {
-                message.reply("Seu cargo não te dá permissão para kickar alguém.");
-                return;
-            }
-            let memberKick = message.mentions.members.first();
-            if (!memberKick) {
-                message.reply(memberKick + " não é um usuário desse servidor.");
-                return;
-            }
-            if (!memberKick.kickable) {
-                message.reply("você não pode kickar esse usuário. Aparentemente ele é mais importante que você, seu lixo!");
-                return;
-            }
-            let fraseKick = message.content.trim().split(/ +/g);
-            fraseKick.shift();
-            let razãoKick = fraseKick.slice(1).join(" ");
-            if (!razãoKick)
-                razãoKick = "Sem nenhuma razão, ou seja, porque eu quis.";
-            await memberKick.kick(razãoKick).then(() => {
-                let userReslv = message.guild.members.find("id", message.mentions.members.first().id);
-                console.log(`Usuário kickado: ${memberKick.id}`);
-                userReslv.send(`Você foi kickado do servidor por: ${razãoKick}`);
-                message.reply(memberKick + " foi kickado por " + message.author.username + " por motivos de: " + razãoKick);
-            }).catch(erro => message.reply("Erro ao kickar " + memberKick + ".\nCausa do erro: " + erro));
+            await playerKick(message);
         }
         //Ban
         else if (messageClear.startsWith("ban")) {
-            if (!message.guild.member(message.author).hasPermission('BAN_MEMBERS')) {
-                message.reply("Seu cargo não te dá permissão para banir alguém.");
-                return;
-            }
-            let memberBan = message.mentions.members.first();
-            if (!memberBan) {
-                message.reply(memberBan + " não é um usuário desse servidor.");
-                return;
-            }
-            if (!memberBan.bannable) {
-                message.reply("você não pode banir esse usuário. Aparentemente ele é mais importante que você, seu lixo!");
-                return;
-            }
-            let fraseBan = message.content.trim().split(/ +/g);
-            fraseBan.shift();
-            let razãoBan = fraseBan.slice(1).join(" ");
-            if (!razãoBan)
-                razãoBan = "Sem nenhuma razão, ou seja, porque eu quis.";
-            await memberBan.ban(razãoBan).then(() => {
-                let userReslv = message.guild.members.find("id", message.mentions.members.first().id);
-                console.log(`Usuário banido: ${memberBan.id}`);
-                userReslv.send(`Você foi banido do servidor por: ${razãoBan}`);
-                message.reply(memberBan + " foi banido por " + message.author.username + " por motivos de: " + razãoBan);
-            }).catch(erro => message.reply("Erro ao banir " + memberBan + ".\nCausa do erro: " + erro));
+            await playerBan(message);
         }
         //Votação
         else if (messageClear.startsWith("votação") || auxiliarVotação) {
@@ -543,22 +495,7 @@ bot.on('message', async message => {
         //BlackList
         else if (messageClear.startsWith("blacklist")) {
             let args = remAcento.remover(message.content.substr(11));
-            if (BlackList[args]) { //se a palavra já existe
-                if (!message.member.roles.some(r => [cfg.cargoAdm].includes(r.name))) {
-                    message.reply("Seu cargo não te dá permissão para desbanir uma palavra.");
-                    return;
-                }
-                delete BlackList[args];
-                message.reply("essa palavra foi desbanida.");
-                console.log("Palavra desbanida: " + args + ". Por: " + message.author.username);
-            } else if (args == "") { //se nao for digitado nada
-                message.reply("você digitou o comando errado, vai ser burro na cabeça do meu pau!\nA sintaxe correta é: `!blacklist [palavra]`")
-                return;
-            } else {
-                BlackList[args] = "TEJE BANIDO";
-                message.reply("palavra adicionada à blacklist.");
-                console.log("Nova palavra banida: " + args + ". Por: " + message.author.username);
-            }
+            addBlacklist(BlackList, args, message);
             salvarJSON.salvarDB(client_db, BlackList, cfg.dbBlackList);
             rankingFile[message.author.id]['Points'] = (rankingFile[message.author.id]['Points'] + 3);
             salvarJSON.salvarDB(client_db, rankingFile, cfg.dbRanking);
@@ -630,84 +567,14 @@ bot.on('message', async message => {
         //Wikipédia
         else if (messageClear.startsWith("wiki")) {
             let args = message.content.split(/ +/);
-            if (args[1] == "imagem") {
-                args.splice(0, 2);
-                let ans = args.join(" ");
-                wikipedia.page.image(ans, function (response) {
-                    if (response) {
-                        message.channel.send("http:" + response);
-                    } else {
-                        message.channel.send("Não foi possivel encontrar uma imagem").then(msg => msg.delete(5000));
-                    }
-                });
-            } else {
-                args.shift();
-                let ans = args.join("%20");
-                url = `https://pt.wikipedia.org/w/api.php?action=opensearch&format=json&search=${ans}`;
-                fetch(url).then(response => {
-                    // console.log(response);
-                    return response.json();
-                }).then(data => {
-                    // console.log(data);
-                    const embed = {
-                        "title": data[1][0],
-                        "description": data[2][0],
-                        "url": data[3][0],
-                        "color": 8487297,
-                        "author": {
-                            "name": "Wikipédia",
-                            "url": data[3][0],
-                            "icon_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Wikipedia-logo-v2.svg/60px-Wikipedia-logo-v2.svg.png"
-                        }
-                    };
-                    message.reply({embed});
-                }).catch(err => {
-                    console.log(err);
-                });
-            }
+            searchWiki(args, message);
         }
         //Converter moedas
         else if (messageClear.startsWith("converter")) {
             let args = message.content.split(/ +/);
             args.shift();
             args[0] = args[0].replace(",", ".");
-            url = `https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml`
-            var data = '';
-            https.get(url, function (res) {
-                if (res.statusCode >= 200 && res.statusCode < 400) {
-                    res.on('data', function (data_) {
-                        data += data_.toString();
-                    });
-                    res.on('end', function () {
-                        let jsonV = xmlconvert.xml2js(data, {
-                            compact: false,
-                            spaces: 1
-                        });
-                        let jsonVmoedas = jsonV.elements[0].elements[2].elements[0].elements
-                        let moedas = {};
-                        for (let i = 0; i < jsonVmoedas.length; i++) {
-                            moedas[jsonVmoedas[i].attributes.currency] = jsonVmoedas[i].attributes.rate;
-                        }
-                        if (args[1].toLowerCase() === "eur") { //EUR para outras moedas
-                            let valor = args[0];
-                            valor = (valor * moedas[args[2].toUpperCase()]);
-                            message.channel.send("```" + args[1].toUpperCase() + " " + parseFloat(args[0]).toFixed(2) + " = " + args[2].toUpperCase() + " " + valor.toFixed(2) + "```");
-                        } else if (args[2].toLowerCase() === 'eur') { //Outras moedas para EUR
-                            let valor = args[0];
-                            valor = (valor * (1 / parseFloat(moedas[args[1].toUpperCase()])));
-                            message.channel.send("```" + args[1].toUpperCase() + " " + parseFloat(args[0]).toFixed(2) + " = " + args[2].toUpperCase() + " " + valor.toFixed(2) + "```");
-                        } else {
-                            let valor = args[0];
-                            valor = (valor * (1 / parseFloat(moedas[args[1].toUpperCase()]))); //Joga pra EUR
-                            valor = (valor * moedas[args[2].toUpperCase()]); //Joga de EUR pra moeda
-                            message.channel.send("```" + args[1].toUpperCase() + " " + parseFloat(args[0]).toFixed(2) + " = " + args[2].toUpperCase() + " " + valor.toFixed(2) + "```");
-                        }
-                    });
-                } else {
-                    console.log("Erro ao carregar o site de conversão");
-                    message.reply("Erro ao carregar o banco de dados da conversão de moedas.");
-                }
-            });
+            converterMoedas(args, message);
         }
         //Rip
         else if (messageClear.startsWith("rip")) {
@@ -732,49 +599,11 @@ bot.on('message', async message => {
             args.shift();
             args = args.join(" ");
             if (args.startsWith("http") || args.startsWith("www")) {
-                request.post({
-                    url: 'https://api.remove.bg/v1.0/removebg',
-                    formData: {
-                        image_url: args,
-                        size: 'auto',
-                    },
-                    headers: {
-                        'X-Api-Key': cfg.tokenRemBg
-                    },
-                    encoding: null
-                }, function (error, response, body) {
-                    if (error) return console.error('Request remove background failed:', error);
-                    if (response.statusCode != 200) return console.error('Error:', response.statusCode, body.toString('utf8'));
-                    fs.writeFileSync("./no-bg.png", body);
-                    message.channel.send(`Aqui está:`, {
-                        files: [
-                            "./no-bg.png"
-                        ]
-                    });
-                });
+                removerBackground(args, message);
             } else {
                 var Attachment = (message.attachments).array();
                 Attachment.forEach(function (attachment) {
-                    request.post({
-                        url: 'https://api.remove.bg/v1.0/removebg',
-                        formData: {
-                            image_url: attachment.url,
-                            size: 'auto',
-                        },
-                        headers: {
-                            'X-Api-Key': cfg.tokenRemBg
-                        },
-                        encoding: null
-                    }, function (error, response, body) {
-                        if (error) return console.error('Request remove background failed:', error);
-                        if (response.statusCode != 200) return console.error('Error:', response.statusCode, body.toString('utf8'));
-                        fs.writeFileSync("./no-bg.png", body);
-                        message.channel.send(`Aqui está:`, {
-                            files: [
-                                "./no-bg.png"
-                            ]
-                        });
-                    });
+                    removerBackground(attachment.url, message);
                 });
             }
         }
