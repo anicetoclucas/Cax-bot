@@ -1,9 +1,8 @@
 const Discord = require('discord.js');
 const cfg = require('./config.json');
-const ytdl = require('ytdl-core');
-const YouTube = require('youtube-node');
+// const ytdl = require('ytdl-core');
+// const YouTube = require('youtube-node');
 const mongodb = require('mongodb');
-const GphApiClient = require('giphy-js-sdk-core');
 const leet = require('leet');
 const request = require('request');
 const Imgur = require('imgur');
@@ -15,10 +14,15 @@ const {searchWiki} = require('./src/searchWiki');
 const {addBlacklist} = require('./src/addBlacklist');
 const {playerBan} = require('./src/ban');
 const {playerKick} = require('./src/kick');
+const {eventMask} = require('./src/masks/eventMask');
+const salvarJSON = require('./src/salvar');
+const remAcento = require('./src/removeracento');
+const HelpList = require('./help/help_list.json');
+const {giphy} = require('./src/giphy');
 
 //Calendário
-const meses = require('./src/meses');
-const semanas = require('./src/semanas');
+const meses = require('./src/masks/meses');
+const semanas = require('./src/masks/semanas');
 
 //Variáveis Globais
 var dbOk = 0;
@@ -33,18 +37,6 @@ var fusohorario = -3;
 // var jaDiaAudio = false;
 // var jaHoraManhaAudio = false;
 // var jaHoraZeroAudio = false;
-
-//Máscaras
-const eventMask = { //event mask for use in calendar
-    "timestamp":null,
-    "mensagem":null
-};
-
-//Carregar arquivos locais
-// var musicCfg = require(cfg.caminhoConfigMusic);
-var HelpList = require(cfg.caminhoHelpList);
-const salvarJSON = require(cfg.caminhoFunçãoSalvarJSON);
-const remAcento = require(cfg.caminhoRemAcento);
 
 //MongoDB
 var MongoClient = mongodb.MongoClient;
@@ -71,9 +63,6 @@ MongoClient.connect(url_DB, {
         dbOk = 2; //connection server error
     });
 
-//Giphy
-giphy = GphApiClient(cfg.tokenGiphy);
-
 //Imgur
 Imgur.setClientId(cfg.tokenImgur);
 Imgur.setAPIUrl('https://api.imgur.com/3/');
@@ -90,9 +79,9 @@ var fraseVote = null;
 // var playlistChoice = null;
 
 //Youtube
-var youTube = new YouTube();
+// var youTube = new YouTube();
 
-youTube.setKey(cfg.tokenYT);
+// youTube.setKey(cfg.tokenYT);
 
 //Functions
 function uploadGiphy(postData) {
@@ -129,7 +118,7 @@ async function botStatus() { //change bot status
     }
 }
 
-async function checkEvent(text) { //check if a event exist in that time
+async function checkEvent(channel) { //check if a event exist in that time
     while (true) {
         let Now = new Date();
         Now.setSeconds(0, 0);
@@ -143,7 +132,7 @@ async function checkEvent(text) { //check if a event exist in that time
                     "icon_url": "https://cdn.discordapp.com/app-icons/487992303298805761/84f9701521f87e6edd46fd15e4f30c77.png"
                 }
             };
-            text.send("@everyone", {embed});
+            channel.send("@everyone", {embed});
             delete eventos[Now.getTime()];
             salvarJSON.salvarDB(client_db, eventos, cfg.dbEventos);
         }
@@ -511,52 +500,28 @@ bot.on('message', async message => {
         //Gif
         else if (messageClear.startsWith("gif")) {
             let searchGif = messageClear.substr(4);
-            giphy.search('gifs', {
-                    "q": searchGif,
-                    "limit": 1,
-                    "rating": "r",
-                    "lang": "pt",
-                    "sort": "relevant"
-                })
-                .then((gifObject) => {
-                    if (gifObject.pagination.count) {
-                        message.channel.send(gifObject.data[0].bitly_url);
-                    } else {
-                        message.channel.send("```Não foi possível encontrar um resultado para essa pesquisa.```")
+            try{
+                message.channel.send(await giphy.search(searchGif));
+            } catch(e){
+                message.channel.send(e)
                             .then(msg => {
                                 msg.delete(1000);
                                 message.delete(1000);
                             });
-                    }
-                })
-                .catch((err) => {
-                    console.log("Erro ao carregar Giphy", err);
-                })
+            }
         }
         //Random Gif
         else if (messageClear.startsWith("randomgif")) {
             let searchGif = messageClear.substr(10);
-            giphy.random('gifs', {
-                    "tag": searchGif,
-                    "rating": "r"
-                })
-                .then((gifObject) => {
-                    if (gifObject.data.images.id) {
-                        giphy.gifByID(gifObject.data.images.id)
-                            .then((ansID) => {
-                                message.channel.send(ansID.data.bitly_url);
-                            });
-                    } else {
-                        message.channel.send("```Não foi possível encontrar um resultado para essa pesquisa.```")
+            try{
+                message.channel.send(await giphy.random(searchGif));
+            }catch(e){
+                message.channel.send(e)
                             .then(msg => {
                                 msg.delete(1000);
                                 message.delete(1000);
                             });
-                    }
-                })
-                .catch((err) => {
-                    console.log("Erro ao carregar Giphy", err);
-                })
+            }
         }
         //Leet
         else if (messageClear.startsWith("leet")) {
@@ -837,5 +802,3 @@ bot.on('message', async message => {
 
 //TODO: Refazer o Player de música (melhorar o host)
 //TODO: Gravar audio do canal
-//TODO: Criar um sistema aleatório de nick
-//TODO: Converter tudo para funções em arquivos separados em './src'
