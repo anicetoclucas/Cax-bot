@@ -15,12 +15,14 @@
     "leet":"Converte o texto para LEET.\n**Sintaxe:** `!leet [frase]`",
     "wiki":"Pesquisa um termo ou imagem no Wikipédia.\n**Sintaxe:** `!wiki [termo]`\nPara pesquisar uma imagem: `!wiki imagem [termo]`",
     "converter":"Conversor de moedas.\n**Sintaxe:** `!converter [valor] [moeda de origem] [moeda de destino]`\nPara saber os códigos das moedas digite `!help listamoedas`",
-    "listamoedas":"USD = Dólar americano\nJPY = Iene Japonês\nBGN = Lev búlgaro\nCZK = Coroa tcheca\nDKK = Coroa dinamarquesa\nGBP = Libra esterlina\nHUF = Florim húngaro\nPLN = Zloty polonês\nRON = Leu romeno\nSEK = Coroa sueca\nCHF = Franco suíço\nISK = Coroa islandesa\nNOK = Coroa norueguesa\nHRK = Kuna croata\nRUB = Rublo russo\nTRY = Lira turca\nAUD = Dólar australiano\nBRL = Real brasileiro\nCAD = Dólar canadense\nCNY = Remimbi (China)\nHKD = Dólar de Hong Kong\nIDR = Rupia indonésia\nILS = Novo shekel israelense\nINR = Rupia indiana\nKRW = Won sul-coreano\nMXN = Peso mexicano\nMYR = Ringgit malaio\nNZD = Dólar neozelandês\nPHP = Peso filipino\nSGD = Dólar singapuriano\nTHB = Baht tailandês\nZAR = Rand sul-africano.",
+    "moedas":"USD = Dólar americano\nJPY = Iene Japonês\nBGN = Lev búlgaro\nCZK = Coroa tcheca\nDKK = Coroa dinamarquesa\nGBP = Libra esterlina\nHUF = Florim húngaro\nPLN = Zloty polonês\nRON = Leu romeno\nSEK = Coroa sueca\nCHF = Franco suíço\nISK = Coroa islandesa\nNOK = Coroa norueguesa\nHRK = Kuna croata\nRUB = Rublo russo\nTRY = Lira turca\nAUD = Dólar australiano\nBRL = Real brasileiro\nCAD = Dólar canadense\nCNY = Remimbi (China)\nHKD = Dólar de Hong Kong\nIDR = Rupia indonésia\nILS = Novo shekel israelense\nINR = Rupia indiana\nKRW = Won sul-coreano\nMXN = Peso mexicano\nMYR = Ringgit malaio\nNZD = Dólar neozelandês\nPHP = Peso filipino\nSGD = Dólar singapuriano\nTHB = Baht tailandês\nZAR = Rand sul-africano.",
     "rembg":"Remove o fundo de uma imagem de uma pessoa.\n**Sintaxe:** `!rembg [url ou imagem em anexo]`",
     "upgif":"Faz upload de um gif no Giphy.\n**Sintaxe** `!upgif [url ou gif em anexo]`",
     "upimgur":"Faz upload de uma imagem para o Imgur.\n**Sintaxe** `!upimgur [url ou imagem em anexo]`",
     "contar":"Faz uma contagem regressiva.\n**Sintaxe:** `!contar [hh:mm:ss]`",
     "addevento":"Cria um evento que será lembrado na data específica.\n**Sintaxe** `!addevento [dd/mm/aaaa] [hh:mm]`, em seguida a mensagem do evento.",
     "respostas":"Mostra todas as auto-respostas do bot.\n**Sintaxe** `!respostas`",
-    "apelido":"Troca o próprio apelido para o formato padrão do servidor `Adjetivo+Animal`\n**Sintaxe** `!apelido`"
+    "apelido":"Troca o próprio apelido para o formato padrão do servidor `Adjetivo+Animal`\n**Sintaxe** `!apelido`",
+    "jooj":"Espelha uma imagem.\n**Sintaxe** `!jooj [Usuário, link ou imagem anexada]`",
+	"ojjo":"Espelha uma imagem invertida.\n**Sintaxe** `!ojjo [Usuário, link ou imagem anexada]`"
 }
