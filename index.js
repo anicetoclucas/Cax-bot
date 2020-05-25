@@ -1,4 +1,5 @@
 const Discord = require('discord.js');
+const fs = require('fs');
 const cfg = require('./config.json');
 // const ytdl = require('ytdl-core');
 // const YouTube = require('youtube-node');
@@ -19,6 +20,8 @@ const salvarJSON = require('./src/salvar');
 const remAcento = require('./src/removeracento');
 const HelpList = require('./help/help_list.json');
 const {giphy} = require('./src/giphy');
+const {jooj} = require('./src/jooj');
+const {ojjo} = require('./src/ojjo');
 
 //Calendário
 const meses = require('./src/masks/meses');
@@ -776,6 +779,110 @@ bot.on('message', async message => {
                 message.reply(`Erro: \n${e}`);
                 console.log(e);
             });
+        }
+        //Jooj
+        else if (messageClear.startsWith("jooj")) {
+            var args = message.content.split(/ +/);
+            args.shift();
+            let mention = message.mentions.users.first();
+            if (mention) {
+                let temp_dir = await jooj(mention.avatarURL);
+                await message.reply("Aqui está:",{
+                    files:[
+                        `./${temp_dir}`
+                    ]
+                });
+                console.log(`> Jooj criado.`);
+                try {
+                    fs.unlinkSync(`./${temp_dir}`);
+                }catch(err){
+                    console.error(err);
+                }
+            } else if(message.attachments.size!=0){
+                var Attachment = (message.attachments).array();
+                Attachment.forEach(async function (attachment) {
+                    let temp_dir = await jooj(attachment.url);
+                    await message.reply("Aqui está:",{
+                        files:[
+                            `./${temp_dir}`
+                        ]
+                    });
+                    console.log(`> Jooj criado.`);
+                    try {
+                        fs.unlinkSync(`./${temp_dir}`);
+                    }catch(err){
+                        console.error(err);
+                    }
+                });
+            } else if (args[0].startsWith("http") || args[0].startsWith("www")) {
+                let temp_dir = await jooj(args[0]);
+                await message.reply("Aqui está:",{
+                    files:[
+                        `./${temp_dir}`
+                    ]
+                });
+                console.log(`> Jooj criado.`);
+                try {
+                    fs.unlinkSync(`./${temp_dir}`);
+                }catch(err){
+                    console.error(err);
+                }
+            } else {
+                message.reply('não foi possivel encontrar uma imagem na sua mensagem.')
+            }
+        }
+        //Ojjo
+        else if (messageClear.startsWith("ojjo")) {
+            var args = message.content.split(/ +/);
+            args.shift();
+            let mention = message.mentions.users.first();
+            if (mention) {
+                let temp_dir = await ojjo(mention.avatarURL);
+                await message.reply("Aqui está:",{
+                    files:[
+                        `./${temp_dir}`
+                    ]
+                });
+                console.log(`> Ojjo criado.`);
+                try {
+                    fs.unlinkSync(`./${temp_dir}`);
+                }catch(err){
+                    console.error(err);
+                }
+            } else if(message.attachments.size!=0){
+                console.log(message.attachments.size);
+                var Attachment = (message.attachments).array();
+                Attachment.forEach(async function (attachment) {
+                    console.log(attachment);
+                    let temp_dir = await ojjo(attachment.url);
+                    await message.reply("Aqui está:",{
+                        files:[
+                            `./${temp_dir}`
+                        ]
+                    });
+                    console.log(`> Ojjo criado.`);
+                    try {
+                        fs.unlinkSync(`./${temp_dir}`);
+                    }catch(err){
+                        console.error(err);
+                    }
+                });
+            } else if (args[0].startsWith("http") || args[0].startsWith("www")) {
+                let temp_dir = await ojjo(args[0]);
+                await message.reply("Aqui está:",{
+                    files:[
+                        `./${temp_dir}`
+                    ]
+                });
+                console.log(`> Ojjo criado.`);
+                try {
+                    fs.unlinkSync(`./${temp_dir}`);
+                }catch(err){
+                    console.error(err);
+                }
+            } else {
+                message.reply('não foi possivel encontrar uma imagem na sua mensagem.')
+            }
         }
         //Unknown command
         else{
