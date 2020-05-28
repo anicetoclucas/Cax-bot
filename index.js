@@ -803,11 +803,10 @@ bot.on('message', async message => {
                     console.error(err);
                 }
             } else if (message.attachments.size != 0) {
-                console.log(message.attachments.size);
                 var Attachment = (message.attachments).array();
                 Attachment.forEach(async function (attachment) {
-                    let temp_dir_ojjo = await ojjo(mention.avatarURL);
-                    let temp_dir_jooj = await jooj(mention.avatarURL);
+                    let temp_dir_jooj = await jooj(attachment.url);
+                    let temp_dir_ojjo = await ojjo(attachment.url);
                     await message.reply("Aqui está:", {
                         files: [
                             `./${temp_dir_jooj}`,
@@ -823,8 +822,8 @@ bot.on('message', async message => {
                     }
                 });
             } else if (args[0].startsWith("http") || args[0].startsWith("www")) {
-                let temp_dir_ojjo = await ojjo(mention.avatarURL);
-                let temp_dir_jooj = await jooj(mention.avatarURL);
+                let temp_dir_jooj = await jooj(args[0]);
+                let temp_dir_ojjo = await ojjo(args[0]);
                 await message.reply("Aqui está:", {
                     files: [
                         `./${temp_dir_jooj}`,
@@ -912,7 +911,6 @@ bot.on('message', async message => {
                     console.error(err);
                 }
             } else if(message.attachments.size!=0){
-                console.log(message.attachments.size);
                 var Attachment = (message.attachments).array();
                 Attachment.forEach(async function (attachment) {
                     let temp_dir = await ojjo(attachment.url);
