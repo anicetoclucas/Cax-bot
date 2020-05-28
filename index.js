@@ -853,7 +853,6 @@ bot.on('message', async message => {
                 console.log(message.attachments.size);
                 var Attachment = (message.attachments).array();
                 Attachment.forEach(async function (attachment) {
-                    console.log(attachment);
                     let temp_dir = await ojjo(attachment.url);
                     await message.reply("Aqui está:",{
                         files:[
