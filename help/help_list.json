@@ -24,5 +24,6 @@
     "respostas":"Mostra todas as auto-respostas do bot.\n**Sintaxe** `!respostas`",
     "apelido":"Troca o próprio apelido para o formato padrão do servidor `Adjetivo+Animal`\n**Sintaxe** `!apelido`",
     "jooj":"Espelha uma imagem.\n**Sintaxe** `!jooj [Usuário, link ou imagem anexada]`",
-	"ojjo":"Espelha uma imagem invertida.\n**Sintaxe** `!ojjo [Usuário, link ou imagem anexada]`"
+    "ojjo":"Espelha uma imagem invertida.\n**Sintaxe** `!ojjo [Usuário, link ou imagem anexada]`",
+    "joojojjo": "Envia os comandos `jooj` e `ojjo` simultaneamente.\n**Sintaxe** `!ojjo [Usuário, link ou imagem anexada]`"
 }
