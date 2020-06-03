@@ -1,6 +1,5 @@
 const fs = require('fs');
 const request = require('request');
-const cfg = require('../config.json');
 
 exports.removerBackground = function (link_URL, message) {
     request.post({
@@ -10,7 +9,7 @@ exports.removerBackground = function (link_URL, message) {
             size: 'auto',
         },
         headers: {
-            'X-Api-Key': cfg.tokenRemBg
+            'X-Api-Key': process.env.TOKEN_REM_BG
         },
         encoding: null
     }, function (error, response, body) {

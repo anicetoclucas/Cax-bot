@@ -1,6 +1,5 @@
 const GphApiClient = require('giphy-js-sdk-core');
-const cfg = require('../config.json');
-Giphy = GphApiClient(cfg.tokenGiphy);
+Giphy = GphApiClient(process.env.TOKEN_GIPHY);
 
 exports.giphy = {
     search: async function(searchGif){

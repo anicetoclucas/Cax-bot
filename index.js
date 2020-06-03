@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const fs = require('fs');
 const cfg = require('./config.json');
+require('dotenv').config()
 // const ytdl = require('ytdl-core');
 // const YouTube = require('youtube-node');
 const mongodb = require('mongodb');
@@ -43,7 +44,7 @@ var fusohorario = -3;
 
 //MongoDB
 var MongoClient = mongodb.MongoClient;
-const url_DB = cfg.tokenDB;
+const url_DB = process.env.TOKEN_DB;
 MongoClient.connect(url_DB, {
         useNewUrlParser: true,
         useUnifiedTopology: true
@@ -67,7 +68,7 @@ MongoClient.connect(url_DB, {
     });
 
 //Imgur
-Imgur.setClientId(cfg.tokenImgur);
+Imgur.setClientId(process.env.TOKEN_IMGUR);
 Imgur.setAPIUrl('https://api.imgur.com/3/');
 
 //Variáveis auxiliares
@@ -84,12 +85,12 @@ var fraseVote = null;
 //Youtube
 // var youTube = new YouTube();
 
-// youTube.setKey(cfg.tokenYT);
+// youTube.setKey(process.env.TOKEN_YT);
 
 //Functions
 function uploadGiphy(postData) {
     var options = {
-        url: 'https://upload.giphy.com/v1/gifs?api_key=' + cfg.tokenGiphy,
+        url: 'https://upload.giphy.com/v1/gifs?api_key=' + process.env.TOKEN_GIPHY,
         formData: postData,
         json: true
     };
@@ -145,7 +146,7 @@ async function checkEvent(channel) { //check if a event exist in that time
 
 //Discord Bot
 const bot = new Discord.Client();
-bot.login(cfg.token); //Token do bot
+bot.login(process.env.TOKEN_BOT); //Token do bot
 
 //Inicial bot state 
 bot.on('ready', async () => {
@@ -186,8 +187,7 @@ bot.on('ready', async () => {
     } else if (dbOk == 2) { //Error on DB inicialization
         console.log("Erro ao iniciar o bot.");
         var textChannel = bot.channels.get(cfg.textChannel);
-        textChannel.send(`Erro ao iniciar o bot.`);
-        client_db.close();
+        textChannel? textChannel.send(`Erro ao iniciar o bot.`) : console.log("Não foi possível enviar a mensagem de erro ao canal de texto.");
     }
 });
 
@@ -582,7 +582,7 @@ bot.on('message', async message => {
             args = args.join(" ");
             if (args.startsWith("http") || args.startsWith("www")) {
                 var postData = {
-                    api_key: cfg.tokenGiphy,
+                    api_key: process.env.TOKEN_GIPHY,
                     source_image_url: args
                 };
                 uploadGiphy(postData).then((gifUrl) => {
@@ -596,7 +596,7 @@ bot.on('message', async message => {
                 var Attachment = (message.attachments).array();
                 Attachment.forEach(function (attachment) {
                     var postData = {
-                        api_key: cfg.tokenGiphy,
+                        api_key: process.env.TOKEN_GIPHY,
                         source_image_url: attachment.url
                     };
                     uploadGiphy(postData).then((gifUrl) => {
