@@ -2,7 +2,6 @@
     "prefix": "!",
     "cargoAdm": "Mestre Supremo da Porra Toda",
     "cargoMod": "RussoSuado",
-    "canalLogNovosMembros": "💬hall_cental_do_bixo_piruleta",
     "caminhoConfigMusic": "./music/config_music.json",
     "dbRanking": "ranking",
     "dbAutoResposta": "listaAutoResposta",
@@ -11,7 +10,5 @@
     "dbEventos":"eventos",
     "dbAudiosAleatorios":"audiosAleatorios",
     "dbbotActivities":"botActivity",
-    "dbmsgOn":"msgOn",
-    "textChannel":"191366385346019328",
-    "voiceChannel":"191366385929158656"
+    "dbmsgOn":"msgOn"
 }

@@ -31,10 +31,8 @@ const semanas = require('./src/masks/semanas');
 //Variáveis Globais
 var dbOk = 0;
 var emoteList = new Array();
-var chanceReact = 8; //chance = valor^-1
+var chanceReact = 8; //chance = valor^-1    
 // var chanceAudio = 100; //chance = valor^-1
-var servidor = "RussosSuados"; //Servidor princial
-// var servidor = "Bot test";       //Servidor de teste
 var fusohorario = -3;
 // var jaTocando = false;
 // var jaAudioLoop = false;
@@ -46,26 +44,26 @@ var fusohorario = -3;
 var MongoClient = mongodb.MongoClient;
 const url_DB = process.env.TOKEN_DB;
 MongoClient.connect(url_DB, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-    })
-    .then(async conn  =>  {
-        client_db = conn.db('cax_discord_bot');
-        console.log("Conexão com MongoDB realizada com sucesso.");
-        rankingFile = await client_db.collection(cfg.dbRanking).findOne();
-        ResponseList = await client_db.collection(cfg.dbAutoResposta).findOne();
-        BlackList = await client_db.collection(cfg.dbBlackList).findOne();
-        playlists = await client_db.collection(cfg.dbPlaylists).findOne();
-        audiosAleatorios = await client_db.collection(cfg.dbAudiosAleatorios).findOne();
-        eventos = await client_db.collection(cfg.dbEventos).findOne();
-        botActivities = await client_db.collection(cfg.dbbotActivities).findOne();
-        msgsOn = await client_db.collection(cfg.dbmsgOn).findOne();
-        dbOk = 1 //server running successfully
-    })
-    .catch(err => {
-        console.log(`Erro ao conectar o MongoClient. [ ${err}]`);
-        dbOk = 2; //connection server error
-    });
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
+.then(async conn  =>  {
+    client_db = conn.db('cax_discord_bot');
+    console.log("Conexão com MongoDB realizada com sucesso.");
+    rankingFile = await client_db.collection(cfg.dbRanking).findOne();
+    ResponseList = await client_db.collection(cfg.dbAutoResposta).findOne();
+    BlackList = await client_db.collection(cfg.dbBlackList).findOne();
+    playlists = await client_db.collection(cfg.dbPlaylists).findOne();
+    audiosAleatorios = await client_db.collection(cfg.dbAudiosAleatorios).findOne();
+    eventos = await client_db.collection(cfg.dbEventos).findOne();
+    botActivities = await client_db.collection(cfg.dbbotActivities).findOne();
+    msgsOn = await client_db.collection(cfg.dbmsgOn).findOne();
+    dbOk = 1 //server running successfully
+})
+.catch(err => {
+    console.log(`Erro ao conectar o MongoClient. [ ${err}]`);
+    dbOk = 2; //connection server error
+});
 
 //Imgur
 Imgur.setClientId(process.env.TOKEN_IMGUR);
@@ -156,11 +154,11 @@ bot.on('ready', async () => {
         await esperar(5000);
     }
     if (dbOk == 1) { //Normal inicialization on DB
-        var textChannel = bot.channels.get(cfg.textChannel);
-
+        var textChannel = bot.guilds.first().systemChannel;
+        
         let rand = Math.floor(Math.random() * (msgsOn["msgs"].length + 1));
         textChannel.send(msgsOn["msgs"][rand]);
-
+        
         console.log("Banco de dados executado com sucesso.");
         console.log('Logado como: ' + bot.user.tag + '!');
         
@@ -177,8 +175,8 @@ bot.on('ready', async () => {
             newhour = (data.getUTCHours() + fusohorario)
         }
         console.log("Hora: " + newhour + ":" + data.getUTCMinutes() + ":" + data.getUTCSeconds());
-
-        emoteList = bot.guilds.find(coll => coll.name == servidor).emojis.map(e => e.id);
+        
+        emoteList = bot.guilds.first().emojis.map(e => e.id);
         
         //Continuos functions
         botStatus();
@@ -186,7 +184,7 @@ bot.on('ready', async () => {
         
     } else if (dbOk == 2) { //Error on DB inicialization
         console.log("Erro ao iniciar o bot.");
-        var textChannel = bot.channels.get(cfg.textChannel);
+        var textChannel = bot.guilds.first().systemChannel;
         textChannel? textChannel.send(`Erro ao iniciar o bot.`) : console.log("Não foi possível enviar a mensagem de erro ao canal de texto.");
     }
 });
@@ -202,16 +200,16 @@ bot.on('guildMemberAdd', async member => {
     rankingFile[member.id] = {
         'Points': 0
     };
-    const channel = member.guild.channels.find(ch => ch.name == cfg.canalLogNovosMembros);
+    const channel = bot.guilds.first().systemChannel;
     if (!channel) {
         console.log("Canal de 'boas vindas' não existe.");
         return;
     }
     member.setNickname(await randomNickname())
-    .catch(e => {
-        message.reply(`Erro: \n${e}`);
-        console.log(e);
-    });
+        .catch(e => {
+            message.reply(`Erro: \n${e}`);
+            console.log(e);
+        });
     channel.send("Bem vindo ao esgoto do Discord, " + member.user + ". \nEsteja avisado que tudo o que você verá aqui é o mais puro **ódio**, **preconceito** e **niilismo** que já existiu. Mas você entrou assim mesmo. \n\nEntão, @everyone, deem os \"meus pêsames\" para " + member + ".\nhttps://i.imgur.com/2WPnTN1.png");
     salvarJSON.salvarDB(client_db, rankingFile, cfg.dbRanking);
 })
@@ -219,27 +217,27 @@ bot.on('guildMemberAdd', async member => {
 //New message typed on text channel
 bot.on('message', async message => {
     if (message.author.bot) return; //Ignore msg from bots
-
+    
     if (auxiliarAddAutoresposta || auxiliarRemAutoresposta || auxiliarVotação || auxiliarEvento) { //check if some auxiliary was changed
         auxiliarAlgum = true;
     } else {
         auxiliarAlgum = false;
     }
-
+    
     if (!rankingFile[message.author.id]) { //Add people to list of points already on server before bot enters
         rankingFile[message.author.id] = {
             'Points': 0
         };
     }
-
+    
     //Bot reactions
     reactRand = Math.floor(Math.random() * chanceReact);
     if (reactRand == 0) {
         message.react(emoteList[Math.floor(Math.random() * emoteList.length)]);
     }
-
+    
     rankingFile[message.author.id]['Points'] = rankingFile[message.author.id]['Points'] + 1;
-
+    
     if (message.content.startsWith(cfg.prefix) || auxiliarAlgum) { //Commands w/ prefix
         messageClear = message.content.substr(1).toLowerCase(); //Remove prefix of string
         //Help
@@ -275,7 +273,7 @@ bot.on('message', async message => {
                 lastResponseList = remAcento.remover(args.toLowerCase());
                 auxiliarAddAutoresposta = true;
                 message.channel.send(`Já existe uma auto-resposta para ${lastResponseList}.\nQual a nova resposta?`)
-                    .then(msg => msg.delete(5000));
+                .then(msg => msg.delete(5000));
                 message.delete(5000);
                 return;
             } else if (args == "" && !auxiliarAddAutoresposta) { //se a resposta foi digitada
@@ -295,13 +293,13 @@ bot.on('message', async message => {
                 ResponseList[lastResponseList] = [null];
                 auxiliarAddAutoresposta = true;
                 message.channel.send("Qual a resposta para '" + lastResponseList + "'?")
-                    .then(msg => msg.delete(5000));
+                .then(msg => msg.delete(5000));
                 message.delete(5000);
             } else { //define a RESPOSTA
                 if (ResponseList[lastResponseList][0] != null) {
                     ResponseList[lastResponseList].push(message.content);
                     message.reply("nova resposta para '" + lastResponseList + "' foi adicionado como: " + message.content + ". :kissing_heart:")
-                        .then(msg => msg.delete(5000));
+                    .then(msg => msg.delete(5000));
                     message.delete(5000);
                     console.log(`Nova auto-resposta adicionada para [${lastResponseList}] como [${message.content}] por [${message.author.username}].`);
                     salvarJSON.salvarDB(client_db, ResponseList, cfg.dbAutoResposta);
@@ -310,7 +308,7 @@ bot.on('message', async message => {
                 } else {
                     ResponseList[lastResponseList][0] = message.content;
                     message.reply("sua resposta para '" + lastResponseList + "' foi adicionado como: " + message.content + ". :kissing_heart:")
-                        .then(msg => msg.delete(5000));
+                    .then(msg => msg.delete(5000));
                     message.delete(5000);
                     console.log(`Nova auto-resposta adicionada para [${lastResponseList}] como [${message.content}] por [${message.author.username}].`);
                     salvarJSON.salvarDB(client_db, ResponseList, cfg.dbAutoResposta);
@@ -418,7 +416,7 @@ bot.on('message', async message => {
                     limit: qntMsgApagar
                 }).then(messages => message.channel.bulkDelete(messages));
                 message.reply("as mensagens foram apagadas :relaxed:")
-                    .then(msg => msg.delete(1000));
+                .then(msg => msg.delete(1000));
                 console.log(`Foram apagadas ${qntMsgApagar-1} mensagens.`);
                 rankingFile[message.author.id]['Points'] = (rankingFile[message.author.id]['Points'] + 2);
                 salvarJSON.salvarDB(client_db, rankingFile, cfg.dbRanking);
@@ -507,10 +505,10 @@ bot.on('message', async message => {
                 message.channel.send(await giphy.search(searchGif));
             } catch(e){
                 message.channel.send(e)
-                            .then(msg => {
-                                msg.delete(1000);
-                                message.delete(1000);
-                            });
+                .then(msg => {
+                    msg.delete(1000);
+                    message.delete(1000);
+                });
             }
         }
         //Random Gif
@@ -520,10 +518,10 @@ bot.on('message', async message => {
                 message.channel.send(await giphy.random(searchGif));
             }catch(e){
                 message.channel.send(e)
-                            .then(msg => {
-                                msg.delete(1000);
-                                message.delete(1000);
-                            });
+                .then(msg => {
+                    msg.delete(1000);
+                    message.delete(1000);
+                });
             }
         }
         //Leet
@@ -667,7 +665,7 @@ bot.on('message', async message => {
                 }
                 msgID.edit(`Contagem encerrada.`);
                 message.channel.send(`Contagem de \`${args[0]} horas e ${args[1]} minutos e ${args[2]} segundos\` encerrada.`);
-
+                
             } else { //Erro: inseriu mais do que 3 argumentos
                 message.reply(`só são permitidos horas, minutos e segundos.`)
                 return;
@@ -714,12 +712,12 @@ bot.on('message', async message => {
             args = args.join(" ");
             if (args.startsWith("http") || args.startsWith("www")) {
                 Imgur.uploadUrl(args)
-                    .then(json => {
-                        message.reply(json.data.link);
-                    })
-                    .catch(err => {
-                        message.channel.send(err.message);
-                    });
+                .then(json => {
+                    message.reply(json.data.link);
+                })
+                .catch(err => {
+                    message.channel.send(err.message);
+                });
             } else {
                 var Attachment = (message.attachments).array();
                 Attachment.forEach(function (attachment) {
@@ -792,7 +790,7 @@ bot.on('message', async message => {
                     files: [
                         `./${temp_dir_jooj}`,
                         `./${temp_dir_ojjo}`
-
+                        
                     ]
                 });
                 console.log(`> Joojojjo criado.`);
