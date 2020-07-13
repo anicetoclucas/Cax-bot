@@ -49,8 +49,6 @@ Cax is migrating to be fully modular. By now, Cax does the following items:
 > Search a random gif.
 * `leet`
 > Convert a text to leet (`1337`).
-* `wiki`
-> Search a term or image on wikipedia.
 * `converter`
 > Exchange currency. `moedas` shows the code of the currency.
 * `rembg`
@@ -68,6 +66,7 @@ Cax is migrating to be fully modular. By now, Cax does the following items:
 
 ## TODO's
 - Add more image manipulation using [Jimp](https://github.com/oliver-moran/jimp)
+- Record audio channel
 
 ## Licence
 Cax is licensed under the MIT license.

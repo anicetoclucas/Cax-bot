@@ -2,8 +2,6 @@ const Discord = require('discord.js');
 const fs = require('fs');
 const cfg = require('./config.json');
 require('dotenv').config()
-// const ytdl = require('ytdl-core');
-// const YouTube = require('youtube-node');
 const mongodb = require('mongodb');
 const leet = require('leet');
 const request = require('request');
@@ -12,7 +10,6 @@ const {randomNickname} = require('./src/randomNickname');
 const {esperar} = require('./src/esperar');
 const {removerBackground} = require('./src/removerBackground');
 const {converterMoedas} = require('./src/converterMoedas');
-const {searchWiki} = require('./src/searchWiki');
 const {addBlacklist} = require('./src/addBlacklist');
 const {playerBan} = require('./src/ban');
 const {playerKick} = require('./src/kick');
@@ -32,13 +29,7 @@ const semanas = require('./src/masks/semanas');
 var dbOk = 0;
 var emoteList = new Array();
 var chanceReact = 8; //chance = valor^-1    
-// var chanceAudio = 100; //chance = valor^-1
 var fusohorario = -3;
-// var jaTocando = false;
-// var jaAudioLoop = false;
-// var jaDiaAudio = false;
-// var jaHoraManhaAudio = false;
-// var jaHoraZeroAudio = false;
 
 //MongoDB
 var MongoClient = mongodb.MongoClient;
@@ -78,12 +69,6 @@ var auxiliarEvento = false;
 var lastResponseList = "";
 var contadorVote = {};
 var fraseVote = null;
-// var playlistChoice = null;
-
-//Youtube
-// var youTube = new YouTube();
-
-// youTube.setKey(process.env.TOKEN_YT);
 
 //Functions
 function uploadGiphy(postData) {
@@ -530,11 +515,6 @@ bot.on('message', async message => {
             textConverted = leet.convert(textRaw);
             message.channel.send(textConverted);
         }
-        //Wikipédia
-        else if (messageClear.startsWith("wiki")) {
-            let args = message.content.split(/ +/);
-            searchWiki(args, message);
-        }
         //Converter moedas
         else if (messageClear.startsWith("converter")) {
             let args = message.content.split(/ +/);
@@ -706,7 +686,7 @@ bot.on('message', async message => {
             }
         }
         //Imgur
-        else if (messageClear.startsWith("upimgur")){
+        else if (messageClear.startsWith("upimgur")) {
             let args = message.content.split(/ +/);
             args.shift();
             args = args.join(" ");
@@ -732,7 +712,7 @@ bot.on('message', async message => {
             }
         }
         //Auto-answer list
-        else if(messageClear.startsWith("respostas")){
+        else if(messageClear.startsWith("respostas")) {
             let resposta = message.content.trim().split(/ +/g);
             resposta.shift();
             resposta = resposta.join(" ");
@@ -768,7 +748,7 @@ bot.on('message', async message => {
             }
         }
         //Random Nickname
-        else if(messageClear.startsWith("apelido")){
+        else if(messageClear.startsWith("apelido")) {
             let newNick = await randomNickname();
             message.member.setNickname(newNick).then(() => {
                 message.reply(`seu novo nome é ${newNick}`);
