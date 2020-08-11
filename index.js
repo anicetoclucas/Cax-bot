@@ -20,6 +20,7 @@ const HelpList = require('./help/help_list.json');
 const {giphy} = require('./src/giphy');
 const {jooj} = require('./src/jooj');
 const {ojjo} = require('./src/ojjo');
+const {recognizeAnime} = require('./src/recognizeAnime');
 
 //Calendário
 const meses = require('./src/masks/meses');
@@ -921,6 +922,19 @@ bot.on('message', async message => {
                 message.reply('não foi possivel encontrar uma imagem na sua mensagem.')
             }
         }
+        else if (messageClear.startsWith("qualanime")) {
+            let args = message.content.split(/ +/);
+            args.shift();
+            args = args.join(" ");
+            if (args.startsWith("http") || args.startsWith("www")) {
+                recognizeAnime(args, message);
+            } else {
+                var Attachment = (message.attachments).array();
+                Attachment.forEach(function (attachment) {
+                    recognizeAnime(attachment.url, message);
+                });
+            }
+        }
         //Unknown command
         else{
             message.channel.send(`https://i.imgur.com/nJ42BI9.jpg`);
@@ -943,6 +957,3 @@ bot.on('message', async message => {
         return;
     }
 });
-
-//TODO: Refazer o Player de música (melhorar o host)
-//TODO: Gravar audio do canal
