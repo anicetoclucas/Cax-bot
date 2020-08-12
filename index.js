@@ -922,6 +922,7 @@ bot.on('message', async message => {
                 message.reply('não foi possivel encontrar uma imagem na sua mensagem.')
             }
         }
+        //Qual Anime
         else if (messageClear.startsWith("qualanime")) {
             let args = message.content.split(/ +/);
             args.shift();
@@ -933,6 +934,20 @@ bot.on('message', async message => {
                 Attachment.forEach(function (attachment) {
                     recognizeAnime(attachment.url, message);
                 });
+            }
+        }
+        //Link to youtube sync
+        else if (messageClear.startsWith("youtube")) {
+            const base_url_synctube = 'https://sync-tube.de/create';
+
+            try{
+                request.get(base_url_synctube)
+                .on('response', (response)=>{
+                    message.reply(response.request.uri.href);
+                });
+            }catch (err){
+                message.reply(`não foi possivel criar a sala, mas você pode fazer isso em: ${base_url_synctube}`);
+                console.log(err);
             }
         }
         //Unknown command
