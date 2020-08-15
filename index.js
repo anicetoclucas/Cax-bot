@@ -21,6 +21,7 @@ const {giphy} = require('./src/giphy');
 const {jooj} = require('./src/jooj');
 const {ojjo} = require('./src/ojjo');
 const {recognizeAnime} = require('./src/recognizeAnime');
+const {synctube} = require('./src/synctube');
 
 //Calendário
 const meses = require('./src/masks/meses');
@@ -939,12 +940,12 @@ bot.on('message', async message => {
         //Link to youtube sync
         else if (messageClear.startsWith("youtube")) {
             const base_url_synctube = 'https://sync-tube.de/create';
-
-            try{
-                request.get(base_url_synctube)
-                .on('response', (response)=>{
-                    message.reply(response.request.uri.href);
-                });
+            let args = message.content.split(/ +/);
+            args.shift();
+            args = args.join(" ");
+            try {
+                const url_Room = await synctube(args);
+                message.reply(url_Room);
             }catch (err){
                 message.reply(`não foi possivel criar a sala, mas você pode fazer isso em: ${base_url_synctube}`);
                 console.log(err);
