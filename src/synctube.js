@@ -12,7 +12,7 @@ async function changeSettings(page){
             console.log("[changeSettings] Esperando abrir a caixa de settings");
             await page.waitForSelector('.settings_visible');
             notError=false;
-        }catch{
+        }catch(err){
             console.log("[changeSettings] Erro. Clicando novamente em #btnSettings");
             notError=true;
         }
