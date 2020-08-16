@@ -38,7 +38,6 @@ async function searchVideo(page, url){
     console.log('[searchVideo] Pesquisou o link');
     await page.waitForSelector('.search_result');
     console.log('[searchVideo] Resultado apareceu');
-    await page.screenshot({path: './screenshots/video.png'});
     await page.click('.search_result > img');
     console.log('[searchVideo] Clicou');
 }
