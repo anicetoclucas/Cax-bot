@@ -18,14 +18,15 @@ const salvarJSON = require('./src/salvar');
 const remAcento = require('./src/removeracento');
 const HelpList = require('./help/help_list.json');
 const {giphy} = require('./src/giphy');
-const {jooj} = require('./src/jooj');
-const {ojjo} = require('./src/ojjo');
+const {jooj} = require('./src/Jimp functions/jooj');
+const {ojjo} = require('./src/Jimp functions/ojjo');
 const {recognizeAnime} = require('./src/recognizeAnime');
 const {synctube} = require('./src/synctube');
 
 //Calendário
 const meses = require('./src/masks/meses');
 const semanas = require('./src/masks/semanas');
+const { changeMyMind } = require('./src/changeMyMind');
 
 //Variáveis Globais
 var dbOk = 0;
@@ -949,6 +950,27 @@ bot.on('message', async message => {
             }catch (err){
                 message.reply(`não foi possivel criar a sala, mas você pode fazer isso em: ${base_url_synctube}`);
                 console.log(err);
+            }
+        }
+        //Change my mind
+        else if (messageClear.startsWith("changemymind")) {
+            let args = message.content.split(/ +/);
+            args.shift();
+            args = args.join(" ");
+            let temp_img = await changeMyMind(args).catch((msgErr)=>{
+                message.reply(`erro: ${msgErr}`);
+                return;
+            });
+            await message.reply("", {
+                files:[
+                    `${temp_img}`
+                ]
+            });
+            console.log(`> Change My Mind criado.`);
+            try {
+                fs.unlinkSync(`${temp_img}`);
+            }catch(err){
+                console.error(err);
             }
         }
         //Unknown command

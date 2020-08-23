@@ -14,3 +14,4 @@ async function espelho(inputMsg) {
 }
 
 exports.jooj = espelho
+
