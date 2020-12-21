@@ -9,9 +9,6 @@ async function changeMyMind(stringMsg) {
             if (err) throw reject(err);
 
             const font = await Jimp.loadFont(Jimp.FONT_SANS_16_BLACK);
-
-            console.log(`W: ${Jimp.measureText(font, stringMsg)}`);
-            console.log(`H: ${Jimp.measureTextHeight(font, stringMsg)}`);
             
             if(Jimp.measureText(font, stringMsg)>maxWidth){
                 const ratioWH = Jimp.measureText(font, stringMsg)/maxWidth;

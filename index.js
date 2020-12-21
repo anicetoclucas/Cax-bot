@@ -23,12 +23,12 @@ const {ojjo} = require('./src/Jimp functions/ojjo');
 const {recognizeAnime} = require('./src/recognizeAnime');
 const {synctube} = require('./src/synctube');
 
-//Calendário
+//Calendar
 const meses = require('./src/masks/meses');
 const semanas = require('./src/masks/semanas');
-const { changeMyMind } = require('./src/changeMyMind');
+const {changeMyMind} = require('./src/changeMyMind');
 
-//Variáveis Globais
+//Global Variables
 var dbOk = 0;
 var emoteList = new Array();
 var chanceReact = 8; //chance = valor^-1    
@@ -55,7 +55,7 @@ MongoClient.connect(url_DB, {
     dbOk = 1 //server running successfully
 })
 .catch(err => {
-    console.log(`Erro ao conectar o MongoClient. [ ${err}]`);
+    console.log(`Erro ao conectar o MongoClient. [${err}]`);
     dbOk = 2; //connection server error
 });
 
@@ -63,11 +63,11 @@ MongoClient.connect(url_DB, {
 Imgur.setClientId(process.env.TOKEN_IMGUR);
 Imgur.setAPIUrl('https://api.imgur.com/3/');
 
-//Variáveis auxiliares
+//Auxiliary Variables
 var auxiliarAlgum = false;
 var auxiliarAddAutoresposta = false;
 var auxiliarRemAutoresposta = false;
-var auxiliarVotação = false;
+var auxiliarVotacao = false;
 var auxiliarEvento = false;
 var lastResponseList = "";
 var contadorVote = {};
@@ -93,16 +93,20 @@ function uploadGiphy(postData) {
 async function botStatus() { //change bot status
     let arrayActivities = botActivities.activities;
     while (true) {
-        let rand = Math.floor(Math.random() * (arrayActivities.length + 1));
-        if (arrayActivities[rand]["url"]) {
-            bot.user.setActivity(arrayActivities[rand]["activity"], {
-                "type": arrayActivities[rand]["type"],
-                "url": arrayActivities[rand]["url"],
-            });
-        } else {
-            bot.user.setActivity(arrayActivities[rand]["activity"], {
-                "type": arrayActivities[rand]["type"]
-            });
+        let rand = Math.floor(Math.random() * (arrayActivities.length));
+        try {
+            if (arrayActivities[rand]["url"]) {
+                bot.user.setActivity(arrayActivities[rand]["activity"], {
+                    "type": arrayActivities[rand]["type"],
+                    "url": arrayActivities[rand]["url"],
+                });
+            } else {
+                bot.user.setActivity(arrayActivities[rand]["activity"], {
+                    "type": arrayActivities[rand]["type"]
+                });
+            }            
+        } catch (error) {
+            console.log(`Ocorreu um erro em no botStatus\nNúmero da mensagem: ${rand}\nCorpo da mensagem: ${arrayActivities[rand]}`);
         }
         await esperar(600000);
     }
@@ -144,25 +148,19 @@ bot.on('ready', async () => {
     if (dbOk == 1) { //Normal inicialization on DB
         var textChannel = bot.guilds.first().systemChannel;
         
-        let rand = Math.floor(Math.random() * (msgsOn["msgs"].length + 1));
-        textChannel.send(msgsOn["msgs"][rand]);
+        let rand = Math.floor(Math.random() * (msgsOn["msgs"].length));
+        // textChannel.send(msgsOn["msgs"][rand]);
         
         console.log("Banco de dados executado com sucesso.");
         console.log('Logado como: ' + bot.user.tag + '!');
         
         var data = new Date();
-        
-        console.log("===Horário===");
-        console.log("Ano: " + data.getUTCFullYear());
-        console.log("Mes: " + meses[data.getUTCMonth()]);
-        console.log("Dia: " + data.getUTCDate());
-        console.log("Semana: " + semanas[data.getUTCDay()]);
         if((data.getUTCHours() + fusohorario)<0){
-            newhour = 24+(data.getUTCHours() + fusohorario)
+            newhour = 24+(data.getUTCHours() + fusohorario);
         }else{
-            newhour = (data.getUTCHours() + fusohorario)
+            newhour = (data.getUTCHours() + fusohorario);
         }
-        console.log("Hora: " + newhour + ":" + data.getUTCMinutes() + ":" + data.getUTCSeconds());
+        console.log(`${semanas[data.getUTCDay()]}, ${data.getUTCDate()}/${meses[data.getUTCMonth()]}/${data.getUTCFullYear()} ${newhour}:${data.getUTCMinutes()}:${data.getUTCSeconds()}`);
         
         emoteList = bot.guilds.first().emojis.map(e => e.id);
         
@@ -200,13 +198,13 @@ bot.on('guildMemberAdd', async member => {
         });
     channel.send("Bem vindo ao esgoto do Discord, " + member.user + ". \nEsteja avisado que tudo o que você verá aqui é o mais puro **ódio**, **preconceito** e **niilismo** que já existiu. Mas você entrou assim mesmo. \n\nEntão, @everyone, deem os \"meus pêsames\" para " + member + ".\nhttps://i.imgur.com/2WPnTN1.png");
     salvarJSON.salvarDB(client_db, rankingFile, cfg.dbRanking);
-})
+});
 
 //New message typed on text channel
 bot.on('message', async message => {
     if (message.author.bot) return; //Ignore msg from bots
     
-    if (auxiliarAddAutoresposta || auxiliarRemAutoresposta || auxiliarVotação || auxiliarEvento) { //check if some auxiliary was changed
+    if (auxiliarAddAutoresposta || auxiliarRemAutoresposta || auxiliarVotacao || auxiliarEvento) { //check if some auxiliary was changed
         auxiliarAlgum = true;
     } else {
         auxiliarAlgum = false;
@@ -420,8 +418,8 @@ bot.on('message', async message => {
             await playerBan(message);
         }
         //Votação
-        else if (messageClear.startsWith("votação") || auxiliarVotação) {
-            if (!auxiliarVotação) {
+        else if (messageClear.startsWith("votação") || auxiliarVotacao) {
+            if (!auxiliarVotacao) {
                 message.channel.send("A votação iniciou! Digite ``resultado`` para encerrar a votação");
                 fraseVote = messageClear.substr(7);
                 fraseVote = fraseVote.split(',');
@@ -433,7 +431,7 @@ bot.on('message', async message => {
                         'Score': 0
                     };
                 }
-                auxiliarVotação = true;
+                auxiliarVotacao = true;
                 rankingFile[message.author.id]['Points'] = (rankingFile[message.author.id]['Points'] + 2);
             } else if (message.content.startsWith("resultado")) {
                 var fraseCompleta = ("Pronto, a votação acabou. Estes são os resultados:\n\n");
@@ -441,7 +439,7 @@ bot.on('message', async message => {
                     fraseCompleta = (fraseCompleta + fraseVote[i] + ": " + contadorVote[fraseVote[i]]["Score"] + "\n")
                 }
                 message.channel.send(fraseCompleta);
-                auxiliarVotação = false;
+                auxiliarVotacao = false;
                 contadorVote = {};
             } else {
                 if (contadorVote[message.content]) {
@@ -715,7 +713,7 @@ bot.on('message', async message => {
             }
         }
         //Auto-answer list
-        else if(messageClear.startsWith("respostas")) {
+        else if (messageClear.startsWith("respostas")) {
             let resposta = message.content.trim().split(/ +/g);
             resposta.shift();
             resposta = resposta.join(" ");
@@ -751,7 +749,7 @@ bot.on('message', async message => {
             }
         }
         //Random Nickname
-        else if(messageClear.startsWith("apelido")) {
+        else if (messageClear.startsWith("apelido")) {
             let newNick = await randomNickname();
             message.member.setNickname(newNick).then(() => {
                 message.reply(`seu novo nome é ${newNick}`);
@@ -978,7 +976,7 @@ bot.on('message', async message => {
             message.channel.send(`https://i.imgur.com/nJ42BI9.jpg`);
         }
         
-    } else { //Sem prefixo
+    } else { //Without prefix
         //Auto-resposta
         if (ResponseList[remAcento.remover(message.content.toLowerCase())]) {
             var random = Math.floor(Math.random() * (ResponseList[remAcento.remover(message.content.toLowerCase())].length - 0) + 0);
