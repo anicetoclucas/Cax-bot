@@ -3,7 +3,6 @@ const fs = require('fs');
 const cfg = require('./config.json');
 require('dotenv').config()
 const mongodb = require('mongodb');
-const leet = require('leet');
 const request = require('request');
 const Imgur = require('imgur');
 const {randomNickname} = require('./src/randomNickname');
@@ -22,6 +21,7 @@ const {jooj} = require('./src/Jimp functions/jooj');
 const {ojjo} = require('./src/Jimp functions/ojjo');
 const {recognizeAnime} = require('./src/recognizeAnime');
 const {synctube} = require('./src/synctube');
+const {leet} = require('./src/leet');
 
 //Calendar
 const meses = require('./src/masks/meses');
@@ -238,9 +238,9 @@ bot.on('message', async message => {
                 let helpsString = "**Lista de comandos:**\n";
                 for (i = 0; i < helps.length; i++) {
                     if (i < (helps.length - 1)) {
-                        helpsString = helpsString + "`" + helps[i] + "`, ";
+                        helpsString = `${helpsString}\`${helps[i]}\`,`;
                     } else {
-                        helpsString = helpsString + "`" + helps[i] + "`.";
+                        helpsString = `${helpsString}\`${helps[i]}\`.`;
                     }
                 }
                 message.channel.send(helpsString);
@@ -513,7 +513,11 @@ bot.on('message', async message => {
         //Leet
         else if (messageClear.startsWith("leet")) {
             let textRaw = messageClear.substr(5);
-            textConverted = leet.convert(textRaw);
+            if (textRaw == ""){
+                message.channel.send(`Erro: é necessário definir um texto.`).then(msg => msg.delete(5000));
+                return;
+            }
+            textConverted = await leet.converter(textRaw);
             message.channel.send(textConverted);
         }
         //Converter moedas
